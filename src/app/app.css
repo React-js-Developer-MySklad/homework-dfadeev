@@ -1,0 +1,41 @@
+#root {
+    display: grid;
+    grid-template-columns: 1fr 5fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    gap: 20px;
+    min-height: 100vh;
+}
+
+header {
+    grid-column: 2;
+}
+
+header div {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+main {
+    grid-column: 2;
+}
+
+footer {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: auto;
+}
+
+@media (max-width: 600px) {
+    header div {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+    }
+    th.hiden-on-mobile {
+        display: none;
+    }
+    td.hiden-on-mobile {
+        display: none;
+    }
+}
