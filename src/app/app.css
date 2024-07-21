@@ -6,35 +6,44 @@
     min-height: 100vh;
 }
 
-header {
+header, main, footer {
     grid-column: 2;
 }
 
-header div {
+.top-panel {
     display: flex;
     justify-content: space-between;
     padding: 5px;
+    gap: 10px;
 }
 
-main {
-    grid-column: 2;
-}
-
-footer {
-    grid-column: 2;
+.copyright {
     grid-row: 3;
     margin-top: auto;
+    text-align: center;
 }
 
 @media (max-width: 600px) {
-    header div {
+    .top-panel {
         display: flex;
         justify-content: center;
         flex-direction: column;
+        align-items: center;
     }
+
+    .top-panel > div.controls {
+        width: 90%;
+    }
+
+    .top-panel > div.controls > button {
+        width: 100%;
+        justify-content: center;
+    }
+
     th.hiden-on-mobile {
         display: none;
     }
+
     td.hiden-on-mobile {
         display: none;
     }
