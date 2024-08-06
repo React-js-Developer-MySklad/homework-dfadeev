@@ -1,0 +1,50 @@
+#root {
+    display: grid;
+    grid-template-columns: 1fr 5fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    gap: 20px;
+    min-height: 100vh;
+}
+
+header, main, footer {
+    grid-column: 2;
+}
+
+.top-panel {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    gap: 10px;
+}
+
+.copyright {
+    grid-row: 3;
+    margin-top: auto;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .top-panel {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .top-panel > div.controls {
+        width: 90%;
+    }
+
+    .top-panel > div.controls > button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    th.hiden-on-mobile {
+        display: none;
+    }
+
+    td.hiden-on-mobile {
+        display: none;
+    }
+}
