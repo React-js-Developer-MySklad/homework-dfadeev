@@ -1,26 +1,13 @@
-#root {
+.header, .main, .footer {
+    grid-column: 2;
+}
+
+.app {
     display: grid;
     grid-template-columns: 1fr 5fr 1fr;
     grid-template-rows: auto 1fr auto;
     gap: 20px;
     min-height: 100vh;
-}
-
-header, main, footer {
-    grid-column: 2;
-}
-
-.top-panel {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px;
-    gap: 10px;
-}
-
-.copyright {
-    grid-row: 3;
-    margin-top: auto;
-    text-align: center;
 }
 
 @media (max-width: 600px) {
@@ -40,11 +27,11 @@ header, main, footer {
         justify-content: center;
     }
 
-    th.hiden-on-mobile {
+    th.hidden-on-mobile {
         display: none;
     }
 
-    td.hiden-on-mobile {
+    td.hidden-on-mobile {
         display: none;
     }
 }
