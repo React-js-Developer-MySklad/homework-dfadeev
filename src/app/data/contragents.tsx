@@ -1,13 +1,48 @@
+import {createContext} from "react";
+
 export interface Contragent {
-  name: String;
-  inn: String;
-  kpp: String;
-  address: String;
+  id?: string
+  name?: string;
+  inn?: string;
+  kpp?: string;
+  address?: string;
 }
 
-export const contragents: Map<number, Contragent> = new Map<number, Contragent>([
-  [1, { name: "Имя1", inn: "ИНН1", address: "Адрес1", kpp: "КПП1" }],
-  [2, { name: "Имя2", inn: "ИНН2", address: "Адрес2", kpp: "КПП2" }],
-  [3, { name: "Имя3", inn: "ИНН3", address: "Адрес3", kpp: "КПП3" }],
-]);
+export class ContragentsApi {
 
+  contragentsApiUrl:string = 'http://localhost:3000/contragents';
+
+  getAll() {
+    return fetch(this.contragentsApiUrl, {method: 'GET'})
+        .then(response => response.json())
+        .catch(error => console.error(error));
+  }
+
+  get(id: string) {
+      return fetch(this.contragentsApiUrl + `/${id}`, {method: 'GET'})
+          .then(response => response.json())
+          .catch(error => console.error(error));
+  }
+
+  save(contragent:Contragent) {
+    delete contragent.id;
+    return fetch(this.contragentsApiUrl, {method: 'POST', body: JSON.stringify(contragent)})
+          .then(response => response.json())
+          .catch(error => console.error(error));
+  }
+
+  update(contragent:Contragent) {
+    return fetch(this.contragentsApiUrl + `/${contragent.id}`, {method: 'PATCH', body: JSON.stringify(contragent)})
+        .then(response => response.json())
+        .catch(error => console.error(error))
+  }
+
+  delete(id: string) {
+    return fetch(this.contragentsApiUrl + `/${id}`, {method: 'DELETE'})
+        .then(response => response.json())
+        .catch(error => console.error(error))
+  }
+
+}
+
+export const ContragentsContext = createContext(null);

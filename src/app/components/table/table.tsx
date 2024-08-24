@@ -1,24 +1,31 @@
 import * as css from './table.module.css'
-import React, { MouseEvent } from 'react';
-import type {Contragent} from '../../data/contragents';
+import React, {MouseEvent, useContext} from 'react';
+import {Contragent, ContragentsApi, ContragentsContext} from '../../data/contragents';
 
 type TableProps = {
-    contragents?: Map<Number, Contragent>,
     columnNames?: Array<String>,
-    onDeleteRow?: Function
-    onEditRow?: Function
+    contragents?: Contragent[],
+    onDeleteRow?: Function,
+    onEditRow?: Function,
 }
 
 type RowProps = {
-    id: Number,
+    id: string,
     row: Contragent,
-    onDelete?: Function
+    onDelete?: Function,
     onEdit?: Function
 }
 
 const defaultColumnNames = ['Наименование', 'ИНН', 'Адрес', 'КПП'];
 
-export default ({contragents = new Map<Number, Contragent>(), columnNames = defaultColumnNames, onDeleteRow, onEditRow }: TableProps) => {
+export default ({columnNames = defaultColumnNames, contragents = [], onDeleteRow, onEditRow }: TableProps) => {
+
+    const contragentsApi:ContragentsApi = useContext(ContragentsContext);
+
+    const deleteRowHandler = (contragentId: string) => {
+        console.log('deleteRowHandler table', contragentId);
+        contragentsApi.delete(contragentId).then(() => onDeleteRow(contragentId));
+    }
 
     return (
         <table className={css.table}>
@@ -40,8 +47,8 @@ export default ({contragents = new Map<Number, Contragent>(), columnNames = defa
                 </tr>
             </thead>
             <tbody>
-                {Array.from(contragents.entries()).map(([id, contragent]) =>
-                    <TableRow id={id} row={contragent} onDelete={onDeleteRow} onEdit={onEditRow} key={id as number}/>
+                {contragents && contragents.map(contragent =>
+                    <TableRow id={contragent.id} row={contragent} onDelete={deleteRowHandler} onEdit={onEditRow} key={contragent.id}/>
                 )}
             </tbody>
         </table>
@@ -68,7 +75,7 @@ function TableRow<T>({id, row, onDelete, onEdit }: RowProps) {
                 {row.name}
             </th>
             <td className={css.cell} id="id" hidden>
-                {id.toString()}
+                {id ? id.toString() : ""}
             </td>
             <td className={css.cell} id="inn">
                 {row.inn}
