@@ -1,80 +1,73 @@
-import { useState } from 'react';
+import {createContext, useEffect, useState} from 'react';
 import * as css from './app.module.css'
 import Footer from './components/footer/footer'
 import Header from './components/header/header';
 import Table from './components/table/table';
-import { Contragent, contragents } from './data/contragents';
+import {Contragent, ContragentsApi, ContragentsContext} from './data/contragents';
 import Modal from './components/modal/modal';
 
 export default () => {
 
-    const [data, setData] = useState(contragents);
-    const [editMode, setEditMode] = useState({ idEditMode: false, contragentId: undefined });
+    const contragentsApi = new ContragentsApi();
+    const [contragents, setContragents] = useState<Contragent[]>();
+    const [editMode, setEditMode] = useState({ isEditMode: false, contragentId: undefined });
 
     const deleteRowHandler = (contragentId: number) => {
-        console.log('deleteRowHandler', contragentId);
-        setData(data => {
-            data.delete(contragentId);
-            console.log(data);
-            return new Map(data);
-        })
-    }
+        updateContragents();
+    };
 
     const editFormHandler = (contragentId?: number) => {
-        console.log('editFormHandler', contragentId);
-        let lastId = Math.max(...Array.from(data.keys()));
-        const id = contragentId ? contragentId : ++lastId;
         setEditMode({
             ...editMode,
-            idEditMode: true,
-            contragentId: id
+            isEditMode: true,
+            contragentId: contragentId
         });
-    }
+    };
 
     const closeFormHandler = () => {
-        console.log('closeFormHandler');
         setEditMode({
             ...editMode,
-            idEditMode: false
+            isEditMode: false
         });
-    }
+    };
 
-    const saveFormHandler = (id: number, contragent: Contragent) => {
-        console.log('saveFormHandler before', id, contragent);
-        setData(data => {
-            data.set(id*1 /* почему-то set() превращает number в string */, contragent);
-            return new Map(data);
+    const saveFormHandler = (contragent: Contragent) => {
+        setEditMode({
+            ...editMode,
+            isEditMode: false
         });
-        console.log(data);
-    }
+        updateContragents();
+    };
 
-    const openFormHandler = (id: number) => {
-        return data.get(id);
-    }
+    const updateContragents = () => {
+        contragentsApi.getAll().then(data => {
+            setContragents(Array.from(data))
+        });
+    };
+
+    useEffect(() => {
+        updateContragents();
+    }, []);
 
     return (
-        <div className={css.app}>
-            <header className={css.header}>
-                <Header onOpenForm={editFormHandler}/>
-            </header>
-            <main className={css.main}>
-                {data && 
-                    <Table contragents={data}
-                        onDeleteRow={deleteRowHandler}
-                        onEditRow={editFormHandler}
-                    />
-                }
-                { editMode.idEditMode &&
-                    <Modal contragentId={editMode.contragentId}
-                        onInit={openFormHandler}
-                        onCloseForm={closeFormHandler}
-                        onSaveHandler={saveFormHandler}
-                    />
-                }
-            </main>
-            <footer className={css.footer}>
-                <Footer />
-            </footer>
-        </div>
-    )
+        <ContragentsContext.Provider value={contragentsApi}>
+            <div className={css.app}>
+                <header className={css.header}>
+                    <Header onOpenForm={editFormHandler}/>
+                </header>
+                <main className={css.main}>
+                    <Table contragents={contragents} onDeleteRow={deleteRowHandler} onEditRow={editFormHandler} />
+                    { editMode.isEditMode &&
+                        <Modal contragentId={editMode.contragentId}
+                            onCloseForm={closeFormHandler}
+                            onSaveButton={saveFormHandler}
+                        />
+                    }
+                </main>
+                <footer className={css.footer}>
+                    <Footer />
+                </footer>
+            </div>
+        </ContragentsContext.Provider>
+    );
 };

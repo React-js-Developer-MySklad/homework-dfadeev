@@ -1,50 +1,63 @@
-import { Contragent } from 'src/app/data/contragents';
+import {Contragent, ContragentsApi, ContragentsContext} from '../../data/contragents';
 import * as css from './modal.module.css'
-import { FormEvent, useState } from 'react';
+import {FormEvent, useContext, useEffect, useState} from 'react';
 
 type Props = {
     title?: string;
-    contragentId: number;
+    contragentId: string;
     onCloseForm: Function;
-    onSaveHandler: Function;
-    onInit: Function;
+    onSaveButton: Function;
 }
 
-const emptyContragent: Contragent = {name: '', inn: '', kpp: '', address: ''};
+interface FormElements extends HTMLFormControlsCollection {
+    id: HTMLInputElement,
+    name: HTMLInputElement,
+    inn: HTMLInputElement,
+    kpp: HTMLInputElement,
+    address: HTMLInputElement
+}
 
-export default ({onCloseForm, title = 'Контрагент', contragentId, onInit, onSaveHandler}: Props) => {
+interface ContragentsFormElement extends HTMLFormElement {
+    readonly elements: FormElements
+}
 
-    const [contragent, setContragent] = useState(onInit(contragentId) || emptyContragent);
+export default ({title = 'Контрагент', contragentId, onSaveButton, onCloseForm}: Props) => {
 
-    interface FormElements extends HTMLFormControlsCollection {
-        id: HTMLInputElement,
-        name: HTMLInputElement,
-        inn: HTMLInputElement,
-        kpp: HTMLInputElement,
-        address: HTMLInputElement
-    }
-
-    interface UsernameFormElement extends HTMLFormElement {
-        readonly elements: FormElements
-    }
+    const contragentsApi:ContragentsApi = useContext(ContragentsContext)
+    const [contragent, setContragent] = useState<Contragent>({});
 
     const onCloseButton = () => {
         onCloseForm();
     }
 
-    const onSaveButton = (e: FormEvent<UsernameFormElement>) => {
+    const onSaveButtonHandler = (e: FormEvent<ContragentsFormElement>) => {
         e.preventDefault();
         const form = e.currentTarget.elements;
         const contragent: Contragent = {
+            id: form.id.value,
             name: form.name.value,
             inn: form.inn.value,
             address: form.address.value,
             kpp: form.kpp.value,
         }
-        setContragent(contragent);
-        onSaveHandler(form.id.value, contragent);
-        onCloseForm();
+        const onResponse = () => {
+            setContragent(contragent);
+            onSaveButton(form.id.value, contragent);
+            onCloseForm();
+        }
+
+        contragent.id
+            ? contragentsApi.update(contragent).then(onResponse)
+            : contragentsApi.save(contragent).then(onResponse);
     }
+
+    contragentId && useEffect(() => {
+         contragentsApi
+            .get(contragentId)
+            .then(data => {
+                setContragent(data ? data : {});
+            });
+    }, []);
 
     return (
         <div id="contragents-modal" tabIndex={-1} className={css.contragents_modal}>
@@ -66,7 +79,7 @@ export default ({onCloseForm, title = 'Контрагент', contragentId, onIn
                     </div>
 
                     <div className={css.main}>
-                        <form className={css.form} onSubmit={onSaveButton}>
+                        <form className={css.form} onSubmit={onSaveButtonHandler}>
                             <div>
                                 <input type="text" name="id" id="id" hidden defaultValue={contragentId}/>
                             </div>

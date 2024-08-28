@@ -1,15 +1,21 @@
 import React from "react";
 import Modal from "./modal";
-import {fireEvent, screen, render} from "@testing-library/react";
+import {fireEvent, screen, render, waitFor} from "@testing-library/react";
+import {ContragentsContext, ContragentsApi} from "../../data/contragents";
 
-
-const onInit = jest.fn();
 const onClose = jest.fn();
 const onSave = jest.fn();
 
 describe('Contragent modal tests', () => {
     it('Show modal without contragent', () => {
-        const {getByText, getByLabelText} = render(<Modal contragentId={0} onCloseForm={onClose} onSaveHandler={onSave} onInit={onInit} />);
+        ContragentsApi.prototype.get = jest.fn((id:string):Promise<any> => {
+            return Promise.resolve({})
+        });
+        const api = jest.mocked(new ContragentsApi());
+        const {getByText, getByLabelText} = render(
+            <ContragentsContext.Provider value={api}>
+                <Modal contragentId={undefined} onCloseForm={onClose} onSaveButton={onSave} />
+            </ContragentsContext.Provider>);
 
         expect(getByText('Контрагент')).toBeTruthy();
         expect(getByLabelText('Наименование')).toHaveProperty("id", "name");
@@ -25,21 +31,34 @@ describe('Contragent modal tests', () => {
     it('Show modal with contragent', () => {
         const contragent = () => {
             return {
+                id: "1",
                 name: "name",
                 inn: "inn",
                 kpp: "kpp",
                 address: "address"
             }
         };
-        const {getByText, getByDisplayValue} = render(<Modal contragentId={0} onCloseForm={onClose} onSaveHandler={onSave} onInit={contragent} />);
+        ContragentsApi.prototype.get = jest.fn((id:string):Promise<any> => {
+            return Promise.resolve(() => contragent)
+        });
+        const api = jest.mocked(new ContragentsApi());
+        const {getByText, getByDisplayValue, } = render(
+            <ContragentsContext.Provider value={api}>
+                <Modal contragentId={"1"} onCloseForm={onClose} onSaveButton={onSave} />
+            </ContragentsContext.Provider>);
 
         expect(getByText('Контрагент')).toBeTruthy();
-        expect(getByDisplayValue('name')).toBeTruthy();
-        expect(getByDisplayValue('address')).toBeTruthy();
+
+        expect(waitFor(() => getByDisplayValue('name'))).toBeTruthy();
+        expect(waitFor(() => getByDisplayValue('address'))).toBeTruthy();
     });
 
     it('Call onCloseForm when on click close button', () => {
-        render(<Modal contragentId={0} onCloseForm={onClose} onSaveHandler={onSave} onInit={onInit} />);
+        const api = jest.mocked(new ContragentsApi());
+        render(
+            <ContragentsContext.Provider value={api}>
+                <Modal contragentId={undefined} onCloseForm={onClose} onSaveButton={onSave} />
+            </ContragentsContext.Provider>);
 
         fireEvent.click(screen.getByTestId('modal-close-button'));
 
