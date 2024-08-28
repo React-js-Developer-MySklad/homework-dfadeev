@@ -1,6 +1,8 @@
 import {Contragent, ContragentsApi, ContragentsContext} from '../../data/contragents';
 import * as css from './modal.module.css'
 import {FormEvent, useContext, useEffect, useState} from 'react';
+import { Form, Field } from 'react-final-form'
+import {composeValidators, innFormat, minLength, numbersOnly, required} from "./validations";
 
 type Props = {
     title?: string;
@@ -30,19 +32,17 @@ export default ({title = 'Контрагент', contragentId, onSaveButton, onC
         onCloseForm();
     }
 
-    const onSaveButtonHandler = (e: FormEvent<ContragentsFormElement>) => {
-        e.preventDefault();
-        const form = e.currentTarget.elements;
+    const onSubmitForm = (values:any) => {
         const contragent: Contragent = {
-            id: form.id.value,
-            name: form.name.value,
-            inn: form.inn.value,
-            address: form.address.value,
-            kpp: form.kpp.value,
+            id: values.id,
+            name: values.name,
+            inn: values.inn,
+            address: values.address,
+            kpp: values.kpp,
         }
         const onResponse = () => {
             setContragent(contragent);
-            onSaveButton(form.id.value, contragent);
+            onSaveButton(values.id, contragent);
             onCloseForm();
         }
 
@@ -79,32 +79,65 @@ export default ({title = 'Контрагент', contragentId, onSaveButton, onC
                     </div>
 
                     <div className={css.main}>
-                        <form className={css.form} onSubmit={onSaveButtonHandler}>
-                            <div>
-                                <input type="text" name="id" id="id" hidden defaultValue={contragentId}/>
-                            </div>
-                            <div>
-                                <label htmlFor="name" className={css.input_label}>Наименование</label>
-                                <input type="text" name="name" id="name" className={css.input} placeholder=""
-                                       defaultValue={contragent.name} required/>
-                            </div>
-                            <div>
-                                <label htmlFor="kpp" className={css.input_label}>КПП</label>
-                                <input type="text" name="kpp" id="kpp" className={css.input} placeholder=""
-                                       defaultValue={contragent.kpp} required/>
-                            </div>
-                            <div>
-                                <label htmlFor="address" className={css.input_label}>Адрес</label>
-                                <input type="text" name="address" id="address" className={css.input} placeholder=""
-                                       defaultValue={contragent.address} required/>
-                            </div>
-                            <div>
-                                <label htmlFor="inn" className={css.input_label}>ИНН</label>
-                                <input type="text" name="inn" id="inn" className={css.input} placeholder=""
-                                       defaultValue={contragent.inn} required/>
-                            </div>
-                            <button type="submit" className={css.save_button}>Сохранить</button>
-                        </form>
+                        <Form onSubmit={onSubmitForm} render={({handleSubmit}) => (
+                            <form className={css.form} onSubmit={handleSubmit}>
+                                    <Field name="id" defaultValue={contragentId}>
+                                        {
+                                            ({ input }) => (
+                                                <div>
+                                                    <input {...input} type="text" name="id" id="id" hidden/>
+                                                </div>
+                                            )
+                                        }
+                                    </Field>
+                                    <Field name="name" validate={composeValidators(required, minLength(3))} defaultValue={contragent.name}>
+                                        {
+                                            ({ input, meta }) => (
+                                                <div>
+                                                    <label htmlFor="name" className={css.input_label}>Наименование</label>
+                                                    <input {...input} type="text" className={css.input}/>
+                                                    {meta.error && meta.touched && <span>{meta.error}</span>}
+                                                </div>
+                                            )
+                                        }
+                                    </Field>
+                                    <Field name="kpp" validate={composeValidators(required, numbersOnly, minLength(10))} defaultValue={contragent.kpp}>
+                                        {
+                                            ({ input, meta }) => (
+                                                <div>
+                                                    <label htmlFor="kpp" className={css.input_label}>КПП</label>
+                                                    <input {...input} type="text" className={css.input}/>
+                                                    {meta.error && meta.touched && <span>{meta.error}</span>}
+                                                </div>
+                                            )
+                                        }
+                                    </Field>
+                                    <Field name="address" validate={composeValidators(required, minLength(5))} defaultValue={contragent.address}>
+                                        {
+                                            ({ input, meta }) => (
+                                                <div>
+                                                    <label htmlFor="address" className={css.input_label}>Адрес</label>
+                                                    <input {...input} type="text" className={css.input}/>
+                                                    {meta.error && meta.touched && <span>{meta.error}</span>}
+                                                </div>
+                                            )
+                                        }
+                                    </Field>
+                                    <Field name="inn" validate={composeValidators(required, innFormat)} defaultValue={contragent.inn}>
+                                        {
+                                            ({ input, meta }) => (
+                                                <div>
+                                                    <label htmlFor="inn" className={css.input_label}>ИНН</label>
+                                                    <input {...input} type="text" className={css.input}/>
+                                                    {meta.error && meta.touched && <span>{meta.error}</span>}
+                                                </div>
+                                            )
+                                        }
+                                    </Field>
+                                <button type="submit" className={css.save_button}>Сохранить</button>
+                            </form>
+                        )}>
+                        </Form>
                     </div>
                 </div>
             </div>
