@@ -1,0 +1,9 @@
+.copyright {
+    grid-row: 3;
+    margin-top: auto;
+    text-align: center;
+}
+
+.copyright_text {
+    @apply block text-sm sm:text-center;
+}
